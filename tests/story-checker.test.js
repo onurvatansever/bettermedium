@@ -102,7 +102,47 @@ describe("Medium network checks", () => {
     );
   });
 
-  it("rejects a redirect outside Medium or to a different story", async () => {
+  it("accepts a same-story redirect to a custom publication domain", async () => {
+    const customUrl =
+      "https://ehandbook.com/example-story-aaaaaaaaaaaa";
+    const result = await checkStory(candidate, {
+      fetchImpl: vi.fn(async () =>
+        response({
+          body: storyHtml(),
+          url: customUrl
+        })
+      )
+    });
+
+    expect(result).toMatchObject({
+      status: "free",
+      accessType: "public",
+      readUrl: customUrl
+    });
+  });
+
+  it("finds a same-story Friend Link on a custom publication domain", async () => {
+    const customUrl =
+      "https://levelup.gitconnected.com/example-story-aaaaaaaaaaaa";
+    const friendUrl =
+      `${customUrl}?sk=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb`;
+    const result = await checkStory(candidate, {
+      fetchImpl: vi.fn(async () =>
+        response({
+          body: storyHtml(`<a href="${friendUrl}">Read free</a>`),
+          url: customUrl
+        })
+      )
+    });
+
+    expect(result).toMatchObject({
+      status: "free",
+      accessType: "friend",
+      readUrl: friendUrl
+    });
+  });
+
+  it("rejects a redirect without the same story ID", async () => {
     const externalResult = await checkStory(candidate, {
       fetchImpl: vi.fn(async () =>
         response({ body: storyHtml(), url: "https://example.com/paywall" })

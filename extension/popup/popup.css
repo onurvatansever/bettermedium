@@ -67,10 +67,27 @@ h1 {
 
 .status-panel,
 .summary,
-.empty-state {
+.empty-state,
+.permission-panel {
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   background: rgb(255 255 255 / 84%);
+}
+
+.permission-panel {
+  padding: 14px;
+}
+
+.permission-panel strong {
+  display: block;
+  font-size: 14px;
+}
+
+.permission-panel p {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 .status-panel {
@@ -171,12 +188,32 @@ h1 {
 }
 
 .read-link,
+.primary-button,
 .secondary-button {
   border: 0;
   border-radius: 9px;
   cursor: pointer;
   font-weight: 750;
   text-decoration: none;
+}
+
+.primary-button {
+  width: 100%;
+  margin-top: 12px;
+  padding: 9px 12px;
+  background: #059669;
+  color: #fff;
+  font-size: 12px;
+}
+
+.primary-button:hover,
+.primary-button:focus-visible {
+  background: #047857;
+}
+
+.primary-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
 }
 
 .read-link {
@@ -248,13 +285,15 @@ h1 {
   .brand p,
   #progress-text,
   .summary span,
-  .empty-state p {
+  .empty-state p,
+  .permission-panel p {
     color: #94a3b8;
   }
 
   .status-panel,
   .summary,
   .empty-state,
+  .permission-panel,
   .result-card {
     border-color: #263449;
     background: rgb(17 26 43 / 94%);
@@ -281,6 +320,16 @@ h1 {
 
   .read-link:hover,
   .read-link:focus-visible {
+    background: #6ee7b7;
+  }
+
+  .primary-button {
+    background: #34d399;
+    color: #052e26;
+  }
+
+  .primary-button:hover,
+  .primary-button:focus-visible {
     background: #6ee7b7;
   }
 

@@ -2,7 +2,23 @@ import {
   classifyMediumHtml,
   friendResultFromCandidate
 } from "./article-classifier.js";
-import { normalizeArticleUrl } from "./url-utils.js";
+import { extractStoryId, normalizeArticleUrl } from "./url-utils.js";
+
+function normalizeStoryDestination(rawUrl, expectedStoryId) {
+  try {
+    const parsed = new URL(rawUrl);
+    if (
+      parsed.protocol !== "https:" ||
+      extractStoryId(parsed.pathname) !== expectedStoryId
+    ) {
+      return null;
+    }
+
+    return `${parsed.origin}${parsed.pathname.replace(/\/+$/, "")}`;
+  } catch {
+    return null;
+  }
+}
 
 export function unknownResult(candidate, reason) {
   return {
@@ -54,9 +70,11 @@ export async function checkStory(
       return unknownResult(candidate, `http_${response.status}`);
     }
 
-    const finalUrl = response.url || normalized.canonicalUrl;
-    const finalArticle = normalizeArticleUrl(finalUrl);
-    if (!finalArticle || finalArticle.storyId !== normalized.storyId) {
+    const finalUrl = normalizeStoryDestination(
+      response.url || normalized.canonicalUrl,
+      normalized.storyId
+    );
+    if (!finalUrl) {
       return unknownResult(candidate, "invalid_redirect_target");
     }
 

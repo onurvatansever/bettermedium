@@ -22,10 +22,20 @@ function parseDocument(html) {
 }
 
 function findFriendLink(document, storyId, baseUrl) {
+  let baseOrigin;
+  try {
+    baseOrigin = new URL(baseUrl).origin;
+  } catch {
+    return null;
+  }
+
   for (const anchor of document.querySelectorAll("a[href]")) {
     try {
       const candidate = new URL(anchor.getAttribute("href"), baseUrl);
-      if (!isMediumHost(candidate.hostname)) {
+      if (
+        candidate.protocol !== "https:" ||
+        (!isMediumHost(candidate.hostname) && candidate.origin !== baseOrigin)
+      ) {
         continue;
       }
 
@@ -41,6 +51,18 @@ function findFriendLink(document, storyId, baseUrl) {
   }
 
   return null;
+}
+
+function readUrlFromFinalUrl(finalUrl, fallback) {
+  try {
+    const parsed = new URL(finalUrl);
+    if (parsed.protocol !== "https:") {
+      return fallback;
+    }
+    return `${parsed.origin}${parsed.pathname.replace(/\/+$/, "")}`;
+  } catch {
+    return fallback;
+  }
 }
 
 function hasLockedSignal(document, html) {
@@ -148,7 +170,7 @@ export function classifyMediumHtml({
   return {
     status: "free",
     accessType: "public",
-    readUrl: normalized.canonicalUrl,
+    readUrl: readUrlFromFinalUrl(finalUrl, normalized.canonicalUrl),
     title,
     reason: "public_story"
   };

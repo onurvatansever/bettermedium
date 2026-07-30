@@ -4,10 +4,18 @@ import {
 } from "../lib/url-utils.js";
 import { extractVisibleLinksFromActivePage } from "../lib/page-extractor.js";
 
+const JOB_SCHEMA_VERSION = 2;
+const LEGACY_BROAD_PERMISSION = {
+  origins: ["https://*/*"]
+};
+
 const elements = {
   emptyMessage: document.querySelector("#empty-message"),
   emptyState: document.querySelector("#empty-state"),
   emptyTitle: document.querySelector("#empty-title"),
+  permissionButton: document.querySelector("#permission-button"),
+  permissionMessage: document.querySelector("#permission-message"),
+  permissionPanel: document.querySelector("#permission-panel"),
   progressBar: document.querySelector("#progress-bar"),
   progressText: document.querySelector("#progress-text"),
   results: document.querySelector("#results"),
@@ -19,8 +27,10 @@ const elements = {
 
 let currentCandidates = [];
 let currentFingerprint = null;
+let currentRequiredOrigins = [];
 
 function showError(title, message, canRetry = false) {
+  elements.permissionPanel.hidden = true;
   elements.statusPanel.hidden = true;
   elements.summary.hidden = true;
   elements.results.replaceChildren();
@@ -28,6 +38,41 @@ function showError(title, message, canRetry = false) {
   elements.emptyMessage.textContent = message;
   elements.emptyState.hidden = false;
   elements.retryButton.hidden = !canRetry;
+}
+
+function normalizeOrigins(origins) {
+  return [
+    ...new Set(
+      origins.flatMap((value) => {
+        try {
+          const url = new URL(value);
+          return url.protocol === "https:" ? [url.origin] : [];
+        } catch {
+          return [];
+        }
+      })
+    )
+  ].sort();
+}
+
+function showRequiredOrigins(origins, message) {
+  currentRequiredOrigins = normalizeOrigins(origins);
+  if (currentRequiredOrigins.length === 0) {
+    elements.permissionPanel.hidden = true;
+    return;
+  }
+
+  const domains = currentRequiredOrigins
+    .map((origin) => new URL(origin).hostname)
+    .join(", ");
+
+  elements.retryButton.hidden = true;
+  elements.permissionButton.disabled = false;
+  elements.permissionButton.textContent = "Bu yayınlara izin ver ve tekrar tara";
+  elements.permissionMessage.textContent =
+    message ??
+    `Bu özet ${domains} yayınlarına yönleniyor. BetterMedium yalnızca bu domainlerdeki makaleleri kontrol etmek için izin ister.`;
+  elements.permissionPanel.hidden = false;
 }
 
 function resultCard(result) {
@@ -78,9 +123,17 @@ function renderJob(job) {
         : "Tarama tamamlanamadı";
 
   const free = job.free ?? [];
+  const requiredOrigins = normalizeOrigins(job.requiredOrigins ?? []);
   elements.results.replaceChildren(...free.map(resultCard));
 
-  if (job.status === "running" || free.length > 0) {
+  if (job.status === "completed" && requiredOrigins.length > 0) {
+    showRequiredOrigins(requiredOrigins);
+  } else {
+    currentRequiredOrigins = [];
+    elements.permissionPanel.hidden = true;
+  }
+
+  if (job.status === "running" || free.length > 0 || requiredOrigins.length > 0) {
     elements.summary.hidden = false;
     elements.summary.replaceChildren();
 
@@ -98,7 +151,11 @@ function renderJob(job) {
     elements.summary.hidden = true;
   }
 
-  if (job.status === "completed" && free.length === 0) {
+  if (
+    job.status === "completed" &&
+    free.length === 0 &&
+    requiredOrigins.length === 0
+  ) {
     showError(
       "Ücretsiz yazı bulunamadı",
       `${total} Medium yazısı incelendi; açık veya Friend Link paylaşılmış bir yazı bulunamadı.`,
@@ -111,7 +168,8 @@ function renderJob(job) {
       true
     );
   } else {
-    elements.retryButton.hidden = job.status !== "completed";
+    elements.retryButton.hidden =
+      job.status !== "completed" || requiredOrigins.length > 0;
   }
 }
 
@@ -129,7 +187,8 @@ async function readActiveDigest() {
   return injection?.[0]?.result;
 }
 
-async function startAnalysis() {
+async function startAnalysis({ force = false } = {}) {
+  elements.permissionPanel.hidden = true;
   elements.emptyState.hidden = true;
   elements.retryButton.hidden = true;
   elements.statusPanel.hidden = false;
@@ -170,9 +229,12 @@ async function startAnalysis() {
     return;
   }
 
-  const existing = await browser.runtime.sendMessage({ type: "GET_ANALYSIS_STATE" });
+  const existing = force
+    ? null
+    : await browser.runtime.sendMessage({ type: "GET_ANALYSIS_STATE" });
   if (
     existing &&
+    existing.schemaVersion === JOB_SCHEMA_VERSION &&
     existing.fingerprint === currentFingerprint &&
     ["running", "completed"].includes(existing.status)
   ) {
@@ -195,6 +257,47 @@ async function startAnalysis() {
       );
     });
 }
+
+elements.permissionButton.addEventListener("click", async () => {
+  elements.permissionButton.disabled = true;
+  elements.permissionButton.textContent = "İzin bekleniyor…";
+
+  try {
+    const requestedOrigins = currentRequiredOrigins.map(
+      (origin) => `${origin}/*`
+    );
+    const granted = await browser.permissions.request({
+      origins: requestedOrigins
+    });
+    if (!granted) {
+      showRequiredOrigins(
+        currentRequiredOrigins,
+        "İzin verilmedi. Bu yayınlardaki yazılar kontrol edilemedi; diğer sonuçları kullanmaya devam edebilirsin."
+      );
+      return;
+    }
+
+    elements.permissionPanel.hidden = true;
+    elements.statusPanel.hidden = false;
+    elements.statusText.textContent = "İzin verildi, yeniden kontrol ediliyor…";
+    elements.progressText.textContent = "";
+    elements.progressBar.style.width = "8%";
+
+    const retriedJob = await browser.runtime.sendMessage({
+      type: "RETRY_AFTER_PERMISSION"
+    });
+    if (retriedJob) {
+      renderJob(retriedJob);
+    } else {
+      await startAnalysis({ force: true });
+    }
+  } catch {
+    showRequiredOrigins(
+      currentRequiredOrigins,
+      "İzin penceresi açılamadı. Popup’ı kapatıp yeniden deneyebilirsin."
+    );
+  }
+});
 
 elements.retryButton.addEventListener("click", () => {
   if (!currentCandidates.length || !currentFingerprint) {
@@ -221,4 +324,22 @@ browser.storage.onChanged.addListener((changes, areaName) => {
   }
 });
 
-void startAnalysis();
+async function removeLegacyBroadPermission() {
+  try {
+    const granted = await browser.permissions.contains(LEGACY_BROAD_PERMISSION);
+    if (!granted) {
+      return false;
+    }
+
+    return await browser.permissions.remove(LEGACY_BROAD_PERMISSION);
+  } catch {
+    return false;
+  }
+}
+
+async function initialize() {
+  const removedLegacyPermission = await removeLegacyBroadPermission();
+  await startAnalysis({ force: removedLegacyPermission });
+}
+
+void initialize();
