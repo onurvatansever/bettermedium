@@ -1,0 +1,21 @@
+{
+  "name": "bettermedium",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A privacy-first Firefox and Zen extension that finds author-shared Medium Friend Links in the open Gmail digest.",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint:webext": "web-ext lint --source-dir extension --warnings-as-errors",
+    "build": "web-ext build --source-dir extension --artifacts-dir web-ext-artifacts --overwrite-dest"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "jsdom": "^30.0.0",
+    "vitest": "^4.1.10",
+    "web-ext": "^10.5.0"
+  }
+}
