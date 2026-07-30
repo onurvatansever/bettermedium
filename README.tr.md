@@ -1,14 +1,15 @@
-<p align="right">
+<h2 align="right">
   <a href="./README.md" title="English" aria-label="English">🇬🇧</a>
   <a href="./README.tr.md" title="Türkçe" aria-label="Türkçe">🇹🇷</a>
-</p>
+</h2>
 
 # BetterMedium
 
-Açtığın Gmail özetindeki herkese açık Medium yazılarını ve yazarların paylaştığı
-Friend Link'leri bulan, Zen Browser ile uyumlu bir Firefox WebExtension.
+Medium e-posta özetlerindeki ücretsiz okunabilen yazıları bulan bir Firefox
+eklentisi. Herkese açık yazıları ve yazarların paylaştığı Friend Link’leri tek
+yerde gösterir.
 
-BetterMedium, Medium'un ödeme duvarını **aşmaz**.
+BetterMedium, Medium’un ödeme duvarını **aşmaz**.
 
 ## Kullanım
 

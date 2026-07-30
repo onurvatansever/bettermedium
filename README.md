@@ -1,14 +1,14 @@
-<p align="right">
+<h2 align="right">
   <a href="./README.md" title="English" aria-label="English">🇬🇧</a>
   <a href="./README.tr.md" title="Türkçe" aria-label="Türkçe">🇹🇷</a>
-</p>
+</h2>
 
 # BetterMedium
 
-A Firefox WebExtension, compatible with Zen Browser, that finds public Medium
-stories and author-shared Friend Links in the Gmail digest you open.
+A Firefox extension that finds freely accessible stories in your Medium email
+digests. It shows public stories and author-shared Friend Links in one place.
 
-BetterMedium does **not** bypass Medium's paywall.
+BetterMedium does **not** bypass Medium’s paywall.
 
 ## Use
 
