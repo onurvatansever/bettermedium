@@ -1,11 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="BetterMedium">
   <defs>
-    <linearGradient id="bg" x1="16" y1="12" x2="112" y2="116" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#34d399"/>
-      <stop offset="1" stop-color="#059669"/>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#059669"/>
     </linearGradient>
+    <linearGradient id="glowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6ee7b7" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#059669" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
   </defs>
-  <rect width="128" height="128" rx="30" fill="#0f172a"/>
-  <path d="M25 34.5c0-5.8 4.7-10.5 10.5-10.5h57C104.4 24 114 33.6 114 45.5S104.4 67 92.5 67H47v13h38.5C96.3 80 105 88.7 105 99.5S96.3 119 85.5 119h-50C29.7 119 25 114.3 25 108.5v-74Z" fill="url(#bg)"/>
-  <path d="M47 45h44M47 98h37" fill="none" stroke="#ecfdf5" stroke-linecap="round" stroke-width="12"/>
+
+  <!-- Background Tile -->
+  <rect width="128" height="128" rx="28" fill="#0f172a"/>
+  
+  <!-- Subtle Inner Border Glow -->
+  <rect x="2" y="2" width="124" height="124" rx="26" fill="none" stroke="url(#glowGrad)" stroke-width="1.5"/>
+
+  <!-- Document / Article Shape -->
+  <rect x="24" y="22" width="80" height="84" rx="12" fill="#1e293b" filter="url(#shadow)"/>
+  
+  <!-- Article Text Line Accents -->
+  <line x1="36" y1="36" x2="68" y2="36" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+  <line x1="36" y1="46" x2="92" y2="46" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Stylized 'M' Logo with Open Access Check Badge -->
+  <!-- Left Pillar -->
+  <path d="M36 58 V92" stroke="url(#emeraldGrad)" stroke-width="9" stroke-linecap="round"/>
+  <!-- Middle V -->
+  <path d="M36 58 L64 82 L92 58" stroke="url(#emeraldGrad)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Right Pillar -->
+  <path d="M92 58 V92" stroke="url(#emeraldGrad)" stroke-width="9" stroke-linecap="round"/>
+
+  <!-- Emerald Open-Access Badge (Bottom Right Glow) -->
+  <circle cx="94" cy="94" r="16" fill="#0f172a"/>
+  <circle cx="94" cy="94" r="13" fill="url(#emeraldGrad)"/>
+  <!-- Checkmark inside Badge -->
+  <path d="M88 94 L92 98 L100 90" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
 </svg>

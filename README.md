@@ -8,18 +8,15 @@
 A Firefox extension that finds freely accessible stories in your Medium email
 digests. It shows public stories and author-shared Friend Links in one place.
 
+[Install BetterMedium from Firefox Add-ons →](https://addons.mozilla.org/en-US/firefox/addon/bettermedium/)
+
 BetterMedium does **not** bypass Medium’s paywall.
 
 ## Use
 
-1. Open `about:debugging#/runtime/this-firefox`.
-2. Select **Load Temporary Add-on**.
-3. Choose `extension/manifest.json`.
-4. Open a Medium Daily Digest in Gmail; analysis starts automatically.
-5. Click the BetterMedium toolbar icon to view the results.
-
-Temporary installations are removed when the browser restarts. A permanent
-installation requires a Mozilla-signed `.xpi`.
+1. [Install BetterMedium from Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/bettermedium/).
+2. Open a Medium Daily Digest in Gmail; analysis starts automatically.
+3. Click the BetterMedium toolbar icon to view the results.
 
 ## Development
 
@@ -35,7 +32,9 @@ npm run build
 ## Privacy
 
 There is no backend, account, telemetry, or paid service. BetterMedium can read
-the open Gmail page but extracts only Medium story links. If Medium redirects a
-story to an independent publication, Firefox asks only for that publication's
-domain. Requests send no cookies, and only session progress and results are
-stored. Ambiguous or blocked pages are never presented as free.
+the open Gmail page but extracts only Medium story links. When a Medium story
+redirects to an independent publication, Firefox may ask for access to that
+domain the first time. The permission is limited to that site and remembered by
+Firefox; a different publication may require its own permission. Requests send
+no cookies, and only session progress and results are stored. Ambiguous or
+blocked pages are never presented as free.
